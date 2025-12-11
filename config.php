@@ -10,11 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Azure MySQL Configuration
-$host = "manajemen-keuangan-db.mysql.database.azure.com";
-$db_name = "manajemen_keuangan";
-$username = "adminuser";
-$password = "Alamanda@123"; 
+// Azure MySQL Configuration - Using Environment Variables
+$host = getenv('DB_HOST') ?: "manajemen-keuangan-db.mysql.database.azure.com";
+$db_name = getenv('DB_NAME') ?: "manajemen_keuangan";
+$username = getenv('DB_USER') ?: "adminuser";
+$password = getenv('DB_PASSWORD') ?: "DEFAULT_PASSWORD"; // Will be overridden by Azure config
 
 try {
     $conn = new PDO(
@@ -28,12 +28,13 @@ try {
             PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false
         )
     );
-} catch (PDOException $e) {
+} catch(PDOException $e) {
     http_response_code(500);
     echo json_encode(array(
-        "success" => false,
-        "message" => "Database connection failed",
-        "error" => $e->getMessage()
+        "success" => false, 
+        "message" => "Database connection failed"
+        // Error detail di-hide untuk production
     ));
     exit();
 }
+?>
